@@ -143,9 +143,14 @@ def test_reissue_token_from_upstream_jwks_uri_bad_gateway(mock_env):
 
 def test_reissue_token_from_upstream_jwks_uri_timeout(mock_env):
     def app(environ, start_response):
-        time.sleep(3)
-        start_response("404 Not Found", [])
-        yield b""
+        time.sleep(2)
+        start_response(
+            "200 OK",
+            [
+                ("Content-Type", "application/json"),
+            ],
+        )
+        yield mock_env.upstream_public_jwks.export(private_keys=False).encode("utf8")
 
     server = StopableWSGIServer.create(app)
     server.wait()
