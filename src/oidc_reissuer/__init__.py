@@ -2,6 +2,8 @@ from jwcrypto import jwk
 from pyramid.config import Configurator
 from pyramid.settings import aslist
 
+from .jwks_cache import make_jwks_cache_from_path, make_jwks_cache_from_uri
+
 
 def parse_map(value):
     result = value
@@ -15,9 +17,22 @@ def parse_map(value):
 
 
 def main(global_config, **settings):
-    upstream_jwks = jwk.JWKSet()
-    with open(settings["upstream_jwks_file"]) as fp:
-        upstream_jwks.import_keyset(fp.read())
+    settings["upstream_timeout"] = int(settings.get("upstream_timeout") or 30)
+    settings["upstream_jwks_cache_max_age"] = int(
+        settings.get("upstream_jwks_cache_max_age") or 300
+    )
+    if settings.get("upstream_jwks_file"):
+        upstream_jwks_cache = make_jwks_cache_from_path(
+            settings["upstream_jwks_file"],
+            max_age=settings["upstream_jwks_cache_max_age"],
+        )
+    else:
+        upstream_jwks_cache = make_jwks_cache_from_uri(
+            settings["upstream_jwks_uri"],
+            max_age=settings["upstream_jwks_cache_max_age"],
+            timeout=settings["upstream_timeout"],
+        )
+    print(upstream_jwks_cache.value)
 
     issuer_jwks = jwk.JWKSet()
     with open(settings["jwks_file"]) as fp:
@@ -40,7 +55,7 @@ def main(global_config, **settings):
 
     with Configurator(settings=settings) as config:
         registry = config.registry
-        registry.upstream_jwks = upstream_jwks
+        registry.upstream_jwks_cache = upstream_jwks_cache
         registry.issuer_jwks = issuer_jwks
         registry.signing_keys = signing_keys
 

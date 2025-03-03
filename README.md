@@ -23,6 +23,7 @@ from oidc_reissuer import main
 
 settings = {
     "upstream_issuer": "https://gitlab.com",
+    "upstream_jwks_uri": "https://gitlab.com/oauth/discovery/keys",
     # ... other settings
 }
 wsgiapp = main({}, **settings)
@@ -88,13 +89,31 @@ ES256 = 7695e425-1109-4ee2-ac1f-dc3d6ed9fe94
 
 ### upstream_issuer
 
-The upstream issuer should be a valid issuer that supports OIDC Discovery.
+The issuer will be validated on upstream tokens.
 
 For example, `https://gitlab.com`.
 
+### upstream_jwks_uri
+
+The URI where the JWKS can be loaded from to verify upstream tokens.
+
+### upstream_jwks_cache_max_age
+
+The number of seconds to store the upstream JWKS in memory before requesting an updated copy for future requests.
+This must be greater than 0.
+
+Default: `300`.
+
+### upstream_timeout
+
+The number of seconds to wait before failing to access the upstream endpoints.
+
+Default: `30`.
+
 ### upstream_jwks_file
 
-If the upstream issuer does not support OIDC Discovery then it is possible to self-host the JWKS file within the `oidc-reissuer`.
+If the upstream JWKS URI is not accessible then it is possible to self-host the JWKS file within the `oidc-reissuer`.
+If set, this setting will be used instead of loading the JWKS from the `upstream_jwks_uri` setting.
 
 ### clone_upstream_claims
 

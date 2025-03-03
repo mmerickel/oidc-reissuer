@@ -3,8 +3,10 @@ import time
 
 from jwcrypto import jwt
 from pyramid.httpexceptions import (
+    HTTPBadGateway,
     HTTPBadRequest,
     HTTPForbidden,
+    HTTPGatewayTimeout,
     HTTPUnsupportedMediaType,
 )
 from pyramid.view import view_config
@@ -33,7 +35,15 @@ def create_token(request):
     except Exception:
         raise HTTPBadRequest from None
 
-    upstream_jwks = request.registry.upstream_jwks
+    try:
+        upstream_jwks = request.registry.upstream_jwks_cache.value
+    except TimeoutError:
+        log.warning("timeout while loading upstream jwks cache", exc_info=1)
+        raise HTTPGatewayTimeout from None
+    except Exception:
+        log.warning("error while loading upstream jwks cache", exc_info=1)
+        raise HTTPBadGateway from None
+
     try:
         upstream_token = jwt.JWT(
             jwt=upstream_token,
