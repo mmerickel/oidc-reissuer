@@ -92,6 +92,8 @@ ES256 = 7695e425-1109-4ee2-ac1f-dc3d6ed9fe94
 The default algorithm used to sign new keys when all other options fail to determine an appropriate signing key.
 This algorithm must match to a selected key via the `signing_key_ids` map.
 
+If a value is not supplied then the first algorithm in ``signing_key_ids`` will be used automatically when other algorithm negotiation fails.
+
 ### upstream_issuer
 
 The issuer will be validated on upstream tokens.
