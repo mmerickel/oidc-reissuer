@@ -14,6 +14,7 @@ upstream_ES256 = jwk.JWK.generate(
     kty="EC", use="sig", alg="ES256", kid="upstream-ES256"
 )
 proxy_RS256 = jwk.JWK.generate(kty="RSA", use="sig", alg="RS256", kid="proxy-RS256")
+proxy_ES256 = jwk.JWK.generate(kty="EC", use="sig", alg="ES256", kid="proxy-ES256")
 
 
 @attrs.define
@@ -70,6 +71,7 @@ def mock_env(tmp_path):
 
     proxy_private_jwks = jwk.JWKSet()
     proxy_private_jwks["keys"].add(proxy_RS256)
+    proxy_private_jwks["keys"].add(proxy_ES256)
     with open(tmp_path / "jwks.json", "w") as fp:
         fp.write(proxy_private_jwks.export())
 

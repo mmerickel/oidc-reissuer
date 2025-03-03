@@ -1,3 +1,4 @@
+import json
 from jwcrypto import jwt
 import time
 
@@ -43,7 +44,7 @@ def test_create_token_malformed(mock_env):
     testapp.post_json("/token", {"token": "bad token"}, status=403)
 
 
-def test_create_token_unsupported_implicit_alg(mock_env):
+def test_create_token_uses_default_signing_alg(mock_env):
     testapp = mock_env.make_testapp()
 
     exp = int(time.time()) + 3600
@@ -56,7 +57,24 @@ def test_create_token_unsupported_implicit_alg(mock_env):
         },
     )
 
-    testapp.post_json("/token", {"token": upstream_token}, status=403)
+    response = testapp.post_json("/token", {"token": upstream_token})
+    assert response.status_code == 200
+
+    token = jwt.JWT(
+        jwt=response.text,
+        key=mock_env.proxy_public_jwks,
+        check_claims={
+            "iss": "https://oidc-proxy.example.com",
+            "aud": "https://sts.amazonaws.com",
+            "iat": None,
+            "nbf": None,
+            "exp": exp,
+            "sub": "foo",
+        },
+    )
+    header = json.loads(token.header)
+    assert header["alg"] == "RS256"
+    assert header["kid"] == "proxy-RS256"
 
 
 def test_create_token_unsupported_explicit_alg(mock_env):

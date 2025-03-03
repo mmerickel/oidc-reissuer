@@ -37,8 +37,9 @@ def main(global_config, **settings):
     with open(settings["jwks_file"]) as fp:
         issuer_jwks.import_keyset(fp.read())
 
-    settings["signing_key_ids"] = parse_map(settings["signing_key_ids"])
     settings["clone_upstream_claims"] = aslist(settings["clone_upstream_claims"])
+
+    settings["signing_key_ids"] = parse_map(settings["signing_key_ids"])
     signing_keys = {}
     for alg, kid in settings["signing_key_ids"].items():
         try:
@@ -51,6 +52,16 @@ def main(global_config, **settings):
             raise ValueError(
                 f'could not find a signing key for alg "{alg}" kid "{kid}"'
             )
+
+    default_signing_alg = settings.get("default_signing_alg")
+    if not default_signing_alg:
+        default_signing_alg = next(iter(signing_keys), None)
+    if default_signing_alg not in signing_keys:
+        raise ValueError(
+            'invalid "default_signing_alg" selected an algorithm that is not'
+            ' present in "signing_key_ids"'
+        )
+    settings["default_signing_alg"] = default_signing_alg
 
     with Configurator(settings=settings) as config:
         registry = config.registry

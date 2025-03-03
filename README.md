@@ -87,6 +87,11 @@ RS256 = 23c017d1-dc52-4ec2-99f7-8cd109efdc81
 ES256 = 7695e425-1109-4ee2-ac1f-dc3d6ed9fe94
 ```
 
+### default_signing_alg
+
+The default algorithm used to sign new keys when all other options fail to determine an appropriate signing key.
+This algorithm must match to a selected key via the `signing_key_ids` map.
+
 ### upstream_issuer
 
 The issuer will be validated on upstream tokens.
@@ -131,6 +136,14 @@ sub
 ref
 ref_protected
 ```
+
+## API endpoints
+
+### GET /.well-known/openid-configuration
+
+### GET /.well-known/jwks.json
+
+### POST /token
 
 ## Enable AWS IAM AssumeRoleWithWebIdentity for private Gitlab instances
 

@@ -84,12 +84,7 @@ def create_token(request):
     else:
         signing_alg = upstream_header.get("alg")
         if signing_alg not in supported_signing_keys:
-            log.info(
-                "failed to derive signing alg from upstream token header,"
-                ' received alg "%s"',
-                signing_alg,
-            )
-            raise HTTPForbidden
+            signing_alg = request.registry.settings["default_signing_alg"]
     signing_key = supported_signing_keys[signing_alg]
     new_token = jwt.JWT(
         header={

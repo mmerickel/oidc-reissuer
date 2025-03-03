@@ -25,5 +25,5 @@ def test_issuer_jwks(mock_env):
     assert response.content_type == "application/jwk-set+json"
     result = response.json
     assert set(result.keys()) == {"keys"}
-    assert len(result["keys"]) == 1
-    assert result["keys"][0]["kid"] == "proxy-RS256"
+    assert len(result["keys"]) == 2
+    assert {k["kid"] for k in result["keys"]} == {"proxy-RS256", "proxy-ES256"}
