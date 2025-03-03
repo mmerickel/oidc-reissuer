@@ -22,7 +22,7 @@ def test_create_token_works(mock_env):
     assert response.status_code == 200
 
     jwt.JWT(
-        jwt=response.json["token"],
+        jwt=response.text,
         key=mock_env.proxy_public_jwks,
         check_claims={
             "iss": "https://oidc-proxy.example.com",

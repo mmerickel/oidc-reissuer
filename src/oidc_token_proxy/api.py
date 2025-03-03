@@ -22,7 +22,7 @@ def includeme(config):
 @view_config(
     route_name="api.token",
     request_method="POST",
-    renderer="json",
+    renderer="string",
 )
 def create_token(request):
     try:
@@ -99,4 +99,5 @@ def create_token(request):
         claims=claims,
     )
     new_token.make_signed_token(signing_key)
-    return {"token": new_token.serialize()}
+    request.response.content_type = "application/jwt"
+    return new_token.serialize()
