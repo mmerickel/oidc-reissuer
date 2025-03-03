@@ -1,6 +1,6 @@
-# oidc-reissuer
+# oidc-token-proxy
 
-`oidc-reissuer` can turn a private OIDC `id_token` into a public one.
+`oidc-token-proxy` can turn a private OIDC `id_token` into a public one.
 
 ## Usage
 
@@ -10,16 +10,16 @@ See the `example` folder for a working `site.ini` and example JWKS files.
 
 ```shell
 $ uv init --bare
-$ uv add 'oidc-reissuer[app]'
+$ uv add 'oidc-token-proxy[app]'
 $ uv run pserve site.ini
 ```
 
 ### Embed in your own WSGI app/server
 
-The `oidc-reissuer` is a basic WSGI application and can be run however you wish.
+The `oidc-token-proxy` is a basic WSGI application and can be run however you wish.
 
 ```python
-from oidc_reissuer import main
+from oidc_token_proxy import main
 
 settings = {
     "upstream_issuer": "https://gitlab.com",
@@ -112,13 +112,13 @@ Default: `30`.
 
 ### upstream_jwks_file
 
-If the upstream JWKS URI is not accessible then it is possible to self-host the JWKS file within the `oidc-reissuer`.
+If the upstream JWKS URI is not accessible then it is possible to self-host the JWKS file within the `oidc-token-proxy`.
 If set, this setting will be used instead of loading the JWKS from the `upstream_jwks_uri` setting.
 
 ### clone_upstream_claims
 
 If you do not specify this parameter then the created token will only have the following claims:
-- `iss` - defined by the hosted URL of the `oidc-reissuer`.
+- `iss` - defined by the hosted URL of the `oidc-token-proxy`.
 - `aud` - copied from the upstream claims
 - `iat` - system time when token is created
 - `nbf` - system time when token is created
@@ -140,12 +140,12 @@ You have a private Gitlab instance and you want your CI/CD jobs to authenticate 
 
 AWS IAM requires an OIDC provider to be publically accessible to verify the tokens minted by the Gitlab server.
 
-This is where the `oidc-reissuer` comes into play as a middle-man that can safely expose the identity without exposing the entirety of your private OIDC provider.
+This is where the `oidc-token-proxy` comes into play as a middle-man that can safely expose the identity without exposing the entirety of your private OIDC provider.
 
-### Setup oidc-reissuer
+### Setup oidc-token-proxy
 
-Setup `oidc-reissuer` following the documentation.
-Let's assume it will be hosted at `https://reissuer.example.com` and your Gitlab server is hosted at `https://gitlab.internal`.
+Setup `oidc-token-proxy` following the documentation.
+Let's assume it will be hosted at `https://oidc-proxy.example.com` and your Gitlab server is hosted at `https://gitlab.internal`.
 
 ```ini
 upstream_issuer = https://gitlab.internal
@@ -161,11 +161,11 @@ job_with_id_tokens:
     PRIVATE_ID_TOKEN_FOR_AWS:
       aud: https://sts.amazonaws.com
   script:
-    # this first step uses the oidc-reissuer to translate PRIVATE_ID_TOKEN_FOR_AWS
+    # this first step uses the oidc-token-proxy to translate PRIVATE_ID_TOKEN_FOR_AWS
     # into PUBLIC_ID_TOKEN_FOR_AWS
     - >
       PUBLIC_ID_TOKEN_FOR_AWS=$(curl
-      https://reissuer.example.com/reissue-token
+      https://oidc-proxy.example.com/token
       -X POST
       -H 'Content-Type: application/json'
       --data "{\"token\": \"$PRIVATE_ID_TOKEN_FOR_AWS\"}"

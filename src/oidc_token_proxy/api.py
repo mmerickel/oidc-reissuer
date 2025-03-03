@@ -15,12 +15,12 @@ log = __import__("logging").getLogger(__name__)
 
 
 def includeme(config):
-    config.add_route("api.reissue_token", "/reissue-token")
+    config.add_route("api.token", "/token")
     config.scan(__name__)
 
 
 @view_config(
-    route_name="api.reissue_token",
+    route_name="api.token",
     request_method="POST",
     renderer="json",
 )

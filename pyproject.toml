@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "oidc-reissuer"
+name = "oidc-token-proxy"
 version = "0.1.0"
 license = "MIT"
 license-files = ["LICENSE.txt"]
@@ -37,8 +37,8 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/mmerickel/oidc-reissuer"
-Issues = "https://github.com/mmerickel/oidc-reissuer/issues"
+Repository = "https://github.com/mmerickel/oidc-token-proxy"
+Issues = "https://github.com/mmerickel/oidc-token-proxy/issues"
 
 [project.optional-dependencies]
 app = [
@@ -48,7 +48,7 @@ app = [
 ]
 
 [project.entry-points."paste.app_factory"]
-main = "oidc_reissuer:main"
+main = "oidc_token_proxy:main"
 
 [dependency-groups]
 dev = [
@@ -71,7 +71,7 @@ default-groups = ["dev", "test"]
 show_missing = true
 
 [tool.pytest.ini_options]
-addopts = "--cov src/oidc_reissuer --cov tests"
+addopts = "--cov src/oidc_token_proxy --cov tests"
 testpaths = [
     "tests"
 ]

@@ -1,5 +1,5 @@
 ```
 uv init --bare
-uv add 'oidc-reissuer[app]'
+uv add 'oidc-token-proxy[app]'
 uv run pserve site.ini
 ```

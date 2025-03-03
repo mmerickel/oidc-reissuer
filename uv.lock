@@ -160,7 +160,7 @@ wheels = [
 ]
 
 [[package]]
-name = "oidc-reissuer"
+name = "oidc-token-proxy"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

@@ -4,7 +4,7 @@ import time
 from webtest.http import StopableWSGIServer
 
 
-def test_reissue_token_works(mock_env):
+def test_create_token_works(mock_env):
     mock_env.app_settings["clone_upstream_claims"] = ["sub"]
     testapp = mock_env.make_testapp()
 
@@ -18,19 +18,14 @@ def test_reissue_token_works(mock_env):
         },
     )
 
-    response = testapp.post_json(
-        "/reissue-token",
-        {
-            "token": upstream_token,
-        },
-    )
+    response = testapp.post_json("/token", {"token": upstream_token})
     assert response.status_code == 200
 
     jwt.JWT(
         jwt=response.json["token"],
-        key=mock_env.reissuer_public_jwks,
+        key=mock_env.proxy_public_jwks,
         check_claims={
-            "iss": "https://reissuer.example.com",
+            "iss": "https://oidc-proxy.example.com",
             "aud": "https://sts.amazonaws.com",
             "iat": None,
             "nbf": None,
@@ -40,15 +35,15 @@ def test_reissue_token_works(mock_env):
     )
 
 
-def test_reissue_token_malformed(mock_env):
+def test_create_token_malformed(mock_env):
     testapp = mock_env.make_testapp()
 
-    testapp.post("/reissue-token", "", status=415)
-    testapp.post_json("/reissue-token", {}, status=400)
-    testapp.post_json("/reissue-token", {"token": "bad token"}, status=403)
+    testapp.post("/token", "", status=415)
+    testapp.post_json("/token", {}, status=400)
+    testapp.post_json("/token", {"token": "bad token"}, status=403)
 
 
-def test_reissue_token_unsupported_implicit_alg(mock_env):
+def test_create_token_unsupported_implicit_alg(mock_env):
     testapp = mock_env.make_testapp()
 
     exp = int(time.time()) + 3600
@@ -61,10 +56,10 @@ def test_reissue_token_unsupported_implicit_alg(mock_env):
         },
     )
 
-    testapp.post_json("/reissue-token", {"token": upstream_token}, status=403)
+    testapp.post_json("/token", {"token": upstream_token}, status=403)
 
 
-def test_reissue_token_unsupported_explicit_alg(mock_env):
+def test_create_token_unsupported_explicit_alg(mock_env):
     testapp = mock_env.make_testapp()
 
     exp = int(time.time()) + 3600
@@ -77,12 +72,10 @@ def test_reissue_token_unsupported_explicit_alg(mock_env):
         },
     )
 
-    testapp.post_json(
-        "/reissue-token", {"token": upstream_token, "alg": "ES256"}, status=403
-    )
+    testapp.post_json("/token", {"token": upstream_token, "alg": "ES256"}, status=403)
 
 
-def test_reissue_token_from_upstream_jwks_uri(mock_env):
+def test_create_token_from_upstream_jwks_uri(mock_env):
     def app(environ, start_response):
         start_response(
             "200 OK",
@@ -110,11 +103,11 @@ def test_reissue_token_from_upstream_jwks_uri(mock_env):
         },
     )
 
-    testapp.post_json("/reissue-token", {"token": upstream_token})
+    testapp.post_json("/token", {"token": upstream_token})
     server.shutdown()
 
 
-def test_reissue_token_from_upstream_jwks_uri_bad_gateway(mock_env):
+def test_create_token_from_upstream_jwks_uri_bad_gateway(mock_env):
     def app(environ, start_response):
         start_response("404 Not Found", [])
         yield b""
@@ -137,11 +130,11 @@ def test_reissue_token_from_upstream_jwks_uri_bad_gateway(mock_env):
         },
     )
 
-    testapp.post_json("/reissue-token", {"token": upstream_token}, status=502)
+    testapp.post_json("/token", {"token": upstream_token}, status=502)
     server.shutdown()
 
 
-def test_reissue_token_from_upstream_jwks_uri_timeout(mock_env):
+def test_create_token_from_upstream_jwks_uri_timeout(mock_env):
     def app(environ, start_response):
         time.sleep(2)
         start_response(
@@ -171,5 +164,5 @@ def test_reissue_token_from_upstream_jwks_uri_timeout(mock_env):
         },
     )
 
-    testapp.post_json("/reissue-token", {"token": upstream_token}, status=504)
+    testapp.post_json("/token", {"token": upstream_token}, status=504)
     server.shutdown()

@@ -13,8 +13,8 @@ def test_issuer_openid_configuration(mock_env):
         "subject_types_supported",
         "claims_supported",
     }
-    assert result["issuer"] == "https://reissuer.example.com"
-    assert result["jwks_uri"] == "https://reissuer.example.com/.well-known/jwks.json"
+    assert result["issuer"] == "https://oidc-proxy.example.com"
+    assert result["jwks_uri"] == "https://oidc-proxy.example.com/.well-known/jwks.json"
 
 
 def test_issuer_jwks(mock_env):
@@ -26,4 +26,4 @@ def test_issuer_jwks(mock_env):
     result = response.json
     assert set(result.keys()) == {"keys"}
     assert len(result["keys"]) == 1
-    assert result["keys"][0]["kid"] == "reissuer-RS256"
+    assert result["keys"][0]["kid"] == "proxy-RS256"

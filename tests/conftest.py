@@ -5,7 +5,7 @@ import typing
 from webtest import TestApp
 
 
-from oidc_reissuer import main
+from oidc_token_proxy import main
 
 upstream_RS256 = jwk.JWK.generate(
     kty="RSA", use="sig", alg="RS256", kid="upstream-RS256"
@@ -13,9 +13,7 @@ upstream_RS256 = jwk.JWK.generate(
 upstream_ES256 = jwk.JWK.generate(
     kty="EC", use="sig", alg="ES256", kid="upstream-ES256"
 )
-reissuer_RS256 = jwk.JWK.generate(
-    kty="RSA", use="sig", alg="RS256", kid="reissuer-RS256"
-)
+proxy_RS256 = jwk.JWK.generate(kty="RSA", use="sig", alg="RS256", kid="proxy-RS256")
 
 
 @attrs.define
@@ -23,8 +21,8 @@ class MockEnv:
     upstream_private_jwks: jwk.JWKSet
     upstream_public_jwks: jwk.JWKSet
 
-    reissuer_private_jwks: jwk.JWKSet
-    reissuer_public_jwks: jwk.JWKSet
+    proxy_private_jwks: jwk.JWKSet
+    proxy_public_jwks: jwk.JWKSet
 
     app_settings: dict[str, typing.Any]
 
@@ -53,7 +51,7 @@ class MockEnv:
         return TestApp(
             app,
             extra_environ={
-                "HTTP_HOST": "reissuer.example.com",
+                "HTTP_HOST": "oidc-proxy.example.com",
                 "wsgi.url_scheme": "https",
             },
         )
@@ -70,19 +68,19 @@ def mock_env(tmp_path):
     upstream_public_jwks = jwk.JWKSet()
     upstream_public_jwks.import_keyset(upstream_private_jwks.export(private_keys=False))
 
-    reissuer_private_jwks = jwk.JWKSet()
-    reissuer_private_jwks["keys"].add(reissuer_RS256)
+    proxy_private_jwks = jwk.JWKSet()
+    proxy_private_jwks["keys"].add(proxy_RS256)
     with open(tmp_path / "jwks.json", "w") as fp:
-        fp.write(reissuer_private_jwks.export())
+        fp.write(proxy_private_jwks.export())
 
-    reissuer_public_jwks = jwk.JWKSet()
-    reissuer_public_jwks.import_keyset(reissuer_private_jwks.export(private_keys=False))
+    proxy_public_jwks = jwk.JWKSet()
+    proxy_public_jwks.import_keyset(proxy_private_jwks.export(private_keys=False))
 
     app_settings = {
         "upstream_issuer": "https://oidc.example.com",
         "upstream_jwks_file": tmp_path / "upstream_jwks.json",
         "jwks_file": tmp_path / "jwks.json",
-        "signing_key_ids": "RS256 = reissuer-RS256\n\n",
+        "signing_key_ids": "RS256 = proxy-RS256\n\n",
         "clone_upstream_claims": [
             "sub",
         ],
@@ -91,7 +89,7 @@ def mock_env(tmp_path):
     return MockEnv(
         upstream_private_jwks=upstream_private_jwks,
         upstream_public_jwks=upstream_public_jwks,
-        reissuer_private_jwks=reissuer_private_jwks,
-        reissuer_public_jwks=reissuer_public_jwks,
+        proxy_private_jwks=proxy_private_jwks,
+        proxy_public_jwks=proxy_public_jwks,
         app_settings=app_settings,
     )
