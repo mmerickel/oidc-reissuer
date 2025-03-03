@@ -1,3 +1,4 @@
+import importlib.metadata
 import os
 import threading
 import time
@@ -8,6 +9,8 @@ import attrs
 from jwcrypto import jwk
 
 log = __import__("logging").getLogger(__name__)
+
+package_version = importlib.metadata.version("oidc-token-proxy")
 
 
 @attrs.define
@@ -59,6 +62,12 @@ def make_jwks_cache_from_uri(
 ) -> Cache:
     if headers is None:
         headers = {}
+
+    headers = {k.lower(): v for k, v in headers.items()}
+    headers.setdefault("user-agent", f"oidc-token-proxy/{package_version}")
+    headers.setdefault(
+        "accept", "application/jwk-set+json, application/json;q=0.9, */*;q=0.8"
+    )
 
     def loader():
         r = urllib.request.Request(url=uri, headers=headers)
