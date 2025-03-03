@@ -66,6 +66,6 @@ def make_jwks_cache_from_uri(
             data = response.read().decode("utf8")
         jwks = jwk.JWKSet()
         jwks.import_keyset(data)
-        return data
+        return jwks
 
     return Cache(loader=loader, max_age=max_age)

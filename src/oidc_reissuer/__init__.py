@@ -32,7 +32,6 @@ def main(global_config, **settings):
             max_age=settings["upstream_jwks_cache_max_age"],
             timeout=settings["upstream_timeout"],
         )
-    print(upstream_jwks_cache.value)
 
     issuer_jwks = jwk.JWKSet()
     with open(settings["jwks_file"]) as fp:
