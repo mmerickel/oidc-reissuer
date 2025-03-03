@@ -17,6 +17,8 @@ def parse_map(value):
 
 
 def main(global_config, **settings):
+    settings["extra_request_headers"] = parse_map(settings.get("extra_request_headers"))
+
     settings["upstream_timeout"] = int(settings.get("upstream_timeout") or 30)
     settings["upstream_jwks_cache_max_age"] = int(
         settings.get("upstream_jwks_cache_max_age") or 300
@@ -31,6 +33,7 @@ def main(global_config, **settings):
             settings["upstream_jwks_uri"],
             max_age=settings["upstream_jwks_cache_max_age"],
             timeout=settings["upstream_timeout"],
+            headers=settings["extra_request_headers"],
         )
 
     issuer_jwks = jwk.JWKSet()

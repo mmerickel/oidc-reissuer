@@ -1,5 +1,6 @@
 import json
 from jwcrypto import jwt
+import importlib.metadata
 import time
 
 from webtest.http import StopableWSGIServer
@@ -94,7 +95,10 @@ def test_create_token_unsupported_explicit_alg(mock_env):
 
 
 def test_create_token_from_upstream_jwks_uri(mock_env):
+    result_environ = {}
+
     def app(environ, start_response):
+        result_environ.update(environ)
         start_response(
             "200 OK",
             [
@@ -108,6 +112,9 @@ def test_create_token_from_upstream_jwks_uri(mock_env):
 
     del mock_env.app_settings["upstream_jwks_file"]
     mock_env.app_settings["upstream_jwks_uri"] = server.application_url + "jwks"
+    mock_env.app_settings["extra_request_headers"] = {
+        "x-custom-header": "dummy",
+    }
 
     testapp = mock_env.make_testapp()
 
@@ -123,6 +130,10 @@ def test_create_token_from_upstream_jwks_uri(mock_env):
 
     testapp.post_json("/token", {"token": upstream_token})
     server.shutdown()
+
+    version = importlib.metadata.version("oidc-token-proxy")
+    assert result_environ["HTTP_USER_AGENT"] == f"oidc-token-proxy/{version}"
+    assert result_environ["HTTP_X_CUSTOM_HEADER"] == "dummy"
 
 
 def test_create_token_from_upstream_jwks_uri_bad_gateway(mock_env):

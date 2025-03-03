@@ -139,6 +139,16 @@ ref
 ref_protected
 ```
 
+### extra_request_headers
+
+HTTP headers to add to requests when accessing remote systems.
+For example a custom user-agent.
+
+```
+user-agent = my-oidc-token-proxy
+x-custom = foo
+```
+
 ## API endpoints
 
 ### GET /.well-known/openid-configuration
