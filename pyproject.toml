@@ -1,0 +1,81 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "oidc-reissuer"
+version = "0.1.0"
+license = "MIT"
+license-files = ["LICENSE.txt"]
+description = "An OIDC issuer that can re-mints tokens from a verified upstream issuer."
+readme = "README.md"
+authors = [
+    { name = "Michael Merickel", email = "oss@m.merickel.org" }
+]
+keywords = [
+    "oidc",
+    "oauth",
+    "proxy",
+    "id token",
+    "issuer",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Build Tools",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.13",
+]
+
+requires-python = ">=3.13"
+dependencies = [
+    "attrs>=25.1.0",
+    "hupper>=1.12.1",
+    "jwcrypto>=1.5.6",
+    "pyramid>=2.0.2",
+    "subparse>=0.6",
+]
+
+[project.urls]
+Repository = "https://github.com/mmerickel/oidc-reissuer"
+Issues = "https://github.com/mmerickel/oidc-reissuer/issues"
+
+[project.optional-dependencies]
+app = [
+    "plaster-pastedeploy>=1.0.1",
+    "request-id>=1.0.1",
+    "waitress>=3.0.2",
+]
+
+[project.entry-points."paste.app_factory"]
+main = "oidc_reissuer:main"
+
+[dependency-groups]
+dev = [
+    # sync version changes to .pre-commit-config.yaml and tool.ruff.required-version
+    "ruff==0.9.9",
+]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "webtest>=3.0.4",
+]
+
+[tool.ruff]
+required-version = "0.9.9"
+
+[tool.uv]
+default-groups = ["dev", "test"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.pytest.ini_options]
+addopts = "--cov src/oidc_reissuer --cov tests"
+testpaths = [
+    "tests"
+]
+
+filterwarnings = [
+    "ignore:.*pkg_resources.*:DeprecationWarning",
+]

@@ -1,0 +1,22 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-case-conflict
+      - id: check-json
+        # vscode files are not true json because they allow comments and trailing commas
+        exclude: ^\.vscode/
+      - id: check-toml
+      - id: check-symlinks
+      - id: check-merge-conflict
+      - id: forbid-new-submodules
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # sync version with tool.ruff.required-version and dependency-groups.dev in pyproject.toml
+    rev: v0.9.9
+    hooks:
+      - id: ruff-format
+      - id: ruff
+        args: [--fix]
