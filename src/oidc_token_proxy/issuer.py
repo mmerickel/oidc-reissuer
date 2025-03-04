@@ -13,11 +13,12 @@ def includeme(config):
     renderer="json",
 )
 def openid_configuration(request):
+    settings = request.registry.settings
     supported_claims = {"iss", "aud", "iat", "nbf", "exp"}
-    supported_claims.update(request.registry.settings["clone_upstream_claims"])
-    supported_alg_values = request.registry.settings["signing_key_ids"].keys()
+    supported_claims.update(settings["clone_upstream_claims"])
+    supported_alg_values = settings["signing_key_ids"].keys()
     return {
-        "issuer": request.application_url,
+        "issuer": settings.get("issuer", request.application_url),
         "jwks_uri": request.route_url("issuer.jwks"),
         "response_types_supported": ["id_token"],
         "subject_types_supported": ["public"],

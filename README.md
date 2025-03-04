@@ -101,6 +101,17 @@ This algorithm must match to a selected key via the `signing_key_ids` map.
 
 If a value is not supplied then the first algorithm in ``signing_key_ids`` will be used automatically when other algorithm negotiation fails.
 
+### issuer
+
+**Optional**
+
+The issuer url for the proxy.
+The `{issuer}/.well-known` endpoints need to be hosted at this base.
+For example, `https://oidc-proxy.example.com`.
+
+By default, this is `request.application_url` which is dynamic relative to the current request.
+However, if you're hosting the proxy in a way that it is accessible by multiple URL endpoints (like a private host vs a public host) you need to set this statically so that the generated tokens will be creatable and verifiable consistently.
+
 ### upstream_issuer
 
 **Required**

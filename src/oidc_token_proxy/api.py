@@ -25,6 +25,8 @@ def includeme(config):
     renderer="string",
 )
 def create_token(request):
+    registry = request.registry
+    settings = registry.settings
     try:
         body = request.json
     except json.JSONDecodeError:
@@ -36,7 +38,7 @@ def create_token(request):
         raise HTTPBadRequest from None
 
     try:
-        upstream_jwks = request.registry.upstream_jwks_cache.value
+        upstream_jwks = registry.upstream_jwks_cache.value
     except TimeoutError:
         log.warning("timeout while loading upstream jwks cache", exc_info=1)
         raise HTTPGatewayTimeout from None
@@ -49,7 +51,7 @@ def create_token(request):
             jwt=upstream_token,
             key=upstream_jwks,
             check_claims={
-                "iss": request.registry.settings["upstream_issuer"],
+                "iss": settings["upstream_issuer"],
                 "aud": None,
                 "iat": None,
                 "nbf": None,
@@ -64,18 +66,18 @@ def create_token(request):
 
     now = int(time.time())
     claims = {
-        "iss": request.application_url,
+        "iss": settings.get("issuer", request.application_url),
         "aud": upstream_claims["aud"],
         "iat": now,
         "nbf": now,
         "exp": upstream_claims["exp"],
     }
-    for key in request.registry.settings["clone_upstream_claims"]:
+    for key in registry.settings["clone_upstream_claims"]:
         val = upstream_claims.get(key)
         if val is not None:
             claims[key] = val
 
-    supported_signing_keys = request.registry.signing_keys
+    supported_signing_keys = registry.signing_keys
     if "alg" in body:
         signing_alg = body["alg"]
         if signing_alg not in supported_signing_keys:
@@ -84,7 +86,7 @@ def create_token(request):
     else:
         signing_alg = upstream_header.get("alg")
         if signing_alg not in supported_signing_keys:
-            signing_alg = request.registry.settings["default_signing_alg"]
+            signing_alg = settings["default_signing_alg"]
     signing_key = supported_signing_keys[signing_alg]
     new_token = jwt.JWT(
         header={
