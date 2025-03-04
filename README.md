@@ -244,10 +244,10 @@ job_with_id_tokens:
     - >
       PUBLIC_ID_TOKEN_FOR_AWS=$(curl
       https://oidc-proxy.example.com/token
-      -X POST
-      -H 'Content-Type: application/json'
+      -sSL -X POST
       -H 'Accept: application/jwt'
-      --data "{\"token\": $PRIVATE_ID_TOKEN_FOR_AWS}")
+      -H 'Content-Type: application/json'
+      --data "{\"token\": \"$PRIVATE_ID_TOKEN_FOR_AWS}\"}")
     - >
       aws_sts_output=$(aws sts assume-role-with-web-identity
       --role-arn ${ROLE_ARN}
