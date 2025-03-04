@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/python:3.13-bookworm AS base
+FROM public.ecr.aws/docker/library/python:3.13-slim-bookworm AS base
 
 FROM base AS builder
 
