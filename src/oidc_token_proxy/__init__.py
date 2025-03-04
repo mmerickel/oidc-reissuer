@@ -40,7 +40,9 @@ def main(global_config, **settings):
     with open(settings["jwks_file"]) as fp:
         issuer_jwks.import_keyset(fp.read())
 
-    settings["clone_upstream_claims"] = aslist(settings["clone_upstream_claims"])
+    settings["clone_upstream_claims"] = aslist(
+        settings.get("clone_upstream_claims", "")
+    )
 
     settings["signing_key_ids"] = parse_map(settings["signing_key_ids"])
     signing_keys = {}

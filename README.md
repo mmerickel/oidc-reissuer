@@ -32,6 +32,9 @@ wsgiapp = main({}, **settings)
 ## Configuration
 
 ### jwks_file
+
+**Required**
+
 This must be the path to a standard JWKS file containing private keys.
 For example, you can generate keys at https://jwkset.com/generate.
 
@@ -78,6 +81,8 @@ For example, you can generate keys at https://jwkset.com/generate.
 
 ### signing_key_ids
 
+**Required**
+
 A mapping of `algorithm = kid` defining a specific JWK within the above `jwks_file` that should be used for signing keys for a specific algorithm.
 
 This is necessary any time there are multiple keys for a specific algorithm because they have been rotated over time.
@@ -89,6 +94,8 @@ ES256 = 7695e425-1109-4ee2-ac1f-dc3d6ed9fe94
 
 ### default_signing_alg
 
+**Optional**
+
 The default algorithm used to sign new keys when all other options fail to determine an appropriate signing key.
 This algorithm must match to a selected key via the `signing_key_ids` map.
 
@@ -96,15 +103,21 @@ If a value is not supplied then the first algorithm in ``signing_key_ids`` will 
 
 ### upstream_issuer
 
+**Required**
+
 The issuer will be validated on upstream tokens.
 
 For example, `https://gitlab.com`.
 
 ### upstream_jwks_uri
 
+**Optional**
+
 The URI where the JWKS can be loaded from to verify upstream tokens.
 
 ### upstream_jwks_cache_max_age
+
+**Optional**
 
 The number of seconds to store the upstream JWKS in memory before requesting an updated copy for future requests.
 This must be greater than 0.
@@ -113,16 +126,22 @@ Default: `300`.
 
 ### upstream_timeout
 
+**Optional**
+
 The number of seconds to wait before failing to access the upstream endpoints.
 
 Default: `30`.
 
 ### upstream_jwks_file
 
+**Optional**
+
 If the upstream JWKS URI is not accessible then it is possible to self-host the JWKS file within the `oidc-token-proxy`.
 If set, this setting will be used instead of loading the JWKS from the `upstream_jwks_uri` setting.
 
 ### clone_upstream_claims
+
+**Optional**
 
 If you do not specify this parameter then the created token will only have the following claims:
 - `iss` - defined by the hosted URL of the `oidc-token-proxy`.
@@ -141,6 +160,8 @@ ref_protected
 
 ### extra_request_headers
 
+**Optional**
+
 HTTP headers to add to requests when accessing remote systems.
 For example a custom user-agent.
 
@@ -156,6 +177,27 @@ x-custom = foo
 ### GET /.well-known/jwks.json
 
 ### POST /token
+
+#### Request Parameters
+
+##### token
+
+**Required**
+
+The upstream JWT to be verified and converted to a new token.
+
+##### alg
+
+**Optional**
+
+Explicit request for a key signed via the desired algorithm.
+Can be used to guarantee you get back a key with the desired algorithm.
+
+#### Response
+
+##### application/jwt
+
+The newly-minted JWT signed by `oidc-token-proxy`.
 
 ## Enable AWS IAM AssumeRoleWithWebIdentity for private Gitlab instances
 
