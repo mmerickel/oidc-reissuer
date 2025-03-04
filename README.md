@@ -235,27 +235,20 @@ clone_upstream_claims =
 
 ```yaml
 job_with_id_tokens:
+  variables:
+    AWS_ROLE_ARN: arn:aws:iam::REDACTED:role/REDACTED
+    AWS_REGION: us-east-2
+    AWS_WEB_IDENTITY_TOKEN_FILE: /var/run/secrets/jwt
   id_tokens:
-    PRIVATE_ID_TOKEN_FOR_AWS:
+    OIDC_TOKEN_FOR_AWS:
       aud: https://sts.amazonaws.com
   script:
-    # this first step uses the oidc-token-proxy to translate PRIVATE_ID_TOKEN_FOR_AWS
-    # into PUBLIC_ID_TOKEN_FOR_AWS
+    - mkdir -p /var/run/secrets
     - >
-      PUBLIC_ID_TOKEN_FOR_AWS=$(curl
+      curl -sSL -X POST
       https://oidc-proxy.example.com/token
-      -sSL -X POST
       -H 'Accept: application/jwt'
       -H 'Content-Type: application/json'
-      --data "{\"token\": \"$PRIVATE_ID_TOKEN_FOR_AWS}\"}")
-    - >
-      aws_sts_output=$(aws sts assume-role-with-web-identity
-      --role-arn ${ROLE_ARN}
-      --role-session-name "GitLabRunner-${CI_PROJECT_ID}-${CI_PIPELINE_ID}"
-      --web-identity-token "$PUBLIC_ID_TOKEN_FOR_AWS"
-      --duration-seconds 3600
-      --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]'
-      --output text)
-    - export $(printf "AWS_ACCESS_KEY_ID=%s AWS_SECRET_ACCESS_KEY=%s AWS_SESSION_TOKEN=%s" $aws_sts_output)
+      --data "{\"token\": \"$OIDC_TOKEN_FOR_AWS}\"}" > $AWS_WEB_IDENTITY_TOKEN_FILE
     - aws sts get-caller-identity
 ```
