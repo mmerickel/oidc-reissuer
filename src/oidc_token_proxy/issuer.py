@@ -17,9 +17,10 @@ def openid_configuration(request):
     supported_claims = {"iss", "aud", "iat", "nbf", "exp"}
     supported_claims.update(settings["clone_upstream_claims"])
     supported_alg_values = settings["signing_key_ids"].keys()
+    issuer = settings.get("issuer", request.application_url)
     return {
-        "issuer": settings.get("issuer", request.application_url),
-        "jwks_uri": request.route_url("issuer.jwks"),
+        "issuer": issuer,
+        "jwks_uri": request.route_url("issuer.jwks", _app_url=issuer),
         "response_types_supported": ["id_token"],
         "subject_types_supported": ["public"],
         "id_token_signing_alg_values_supported": sorted(supported_alg_values),
