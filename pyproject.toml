@@ -10,7 +10,7 @@ license-files = ["LICENSE.txt"]
 description = "An OIDC issuer that can re-mints tokens from a verified upstream issuer."
 readme = "README.md"
 authors = [
-    { name = "Michael Merickel", email = "oss@m.merickel.org" }
+    { name = "Michael Merickel", email = "oss@m.merickel.org" },
 ]
 keywords = [
     "oidc",
@@ -20,11 +20,16 @@ keywords = [
     "issuer",
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
-  "Intended Audience :: Developers",
-  "Topic :: Software Development :: Build Tools",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.13",
+    "Development Status :: 4 - Beta",
+    "Framework :: Pyramid",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Topic :: Software Development :: Build Tools",
 ]
 
 requires-python = ">=3.13"
@@ -65,7 +70,10 @@ test = [
 required-version = "0.9.9"
 
 [tool.uv]
-default-groups = ["dev", "test"]
+default-groups = [
+    "dev",
+    "test",
+]
 
 [tool.coverage.report]
 show_missing = true
@@ -73,7 +81,8 @@ show_missing = true
 [tool.pytest.ini_options]
 addopts = "--cov src/oidc_token_proxy --cov tests"
 testpaths = [
-    "tests"
+    "src/oidc_token_proxy",
+    "tests",
 ]
 
 filterwarnings = [
