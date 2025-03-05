@@ -249,7 +249,7 @@ job_with_id_tokens:
       https://oidc-proxy.example.com/token
       -H 'Accept: application/jwt'
       -H 'Content-Type: application/json'
-      --data "{\"token\": \"$OIDC_TOKEN_FOR_AWS}\"}"
+      --data "{\"token\": \"$OIDC_TOKEN_FOR_AWS\"}"
       > $AWS_WEB_IDENTITY_TOKEN_FILE
     - aws sts get-caller-identity
 ```
